@@ -14,6 +14,7 @@ from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
 from Bio.SeqFeature import FeatureLocation, CompoundLocation
 import networkx as nx
+import tokenizer_utils as tokutils
 import transformer_utils as tutils
 import tensorflow as tf
 
@@ -30,9 +31,16 @@ EPOCHS = 20
 
 
 classification_df = pd.read_csv(path/'e_coli_promoters_dataset.csv')
-train_df = classification_df[classification_df.set == 'train']
-valid_df = classification_df[classification_df.set == 'valid']
-test_df = classification_df[classification_df.set == 'test']
+train_df = classification_df[classification_df.set == 'train'].sample(frac=1)
+valid_df = classification_df[classification_df.set == 'valid'].sample(frac=1)
+test_df = classification_df[classification_df.set == 'test'].sample(frac=1)
+
+
+# I will provisionally use fastai tokenizer and libraries, but the next part can be optimesed quite easily
+tok = tokutils.Tokenizer(tokutils.GenomicTokenizer, n_cpus=1, pre_rules=[], post_rules=[], special_cases=['xxpad'])
+data_clas = tokutils.GenomicTextClasDataBunch.from_df(path, train_df, valid_df, test_df=test_df, tokenizer=tok, 
+                                            text_cols='Sequence', label_cols='Promoter', bs=300)
+breakpoint()                                    
 
 learning_rate = tutils.CustomSchedule(D_MODEL)
 optimizer = tf.keras.optimizers.Adam(learning_rate,
@@ -98,8 +106,8 @@ for epoch in range(EPOCHS):
         train_step(inp, tar)
         
         if batch % 50 == 0:
-        print ('Epoch {} Batch {} Loss {:.4f} Accuracy {:.4f}'.format(
-            epoch + 1, batch, train_loss.result(), train_accuracy.result()))
+            print ('Epoch {} Batch {} Loss {:.4f} Accuracy {:.4f}'.format(
+                epoch + 1, batch, train_loss.result(), train_accuracy.result()))
         
     if (epoch + 1) % 5 == 0:
         ckpt_save_path = ckpt_manager.save()
