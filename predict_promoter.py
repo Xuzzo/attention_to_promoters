@@ -19,11 +19,13 @@ import transformer_utils as tutils
 import tensorflow as tf
 
 import pandas as pd
+import numpy as np
 
 
 path = Path('/Users/mmfp/Desktop/genomic_data/e_coli/')
 NUM_LAYERS = 4
 D_MODEL = 128
+BATCH_SIZE=200
 DFF = 512
 NUM_HEADS = 8
 DROPOUT_RATE = 0.1
@@ -40,7 +42,22 @@ test_df = classification_df[classification_df.set == 'test'].sample(frac=1)
 tok = tokutils.Tokenizer(tokutils.GenomicTokenizer, n_cpus=1, pre_rules=[], post_rules=[], special_cases=['xxpad'])
 data_clas = tokutils.GenomicTextClasDataBunch.from_df(path, train_df, valid_df, test_df=test_df, tokenizer=tok, 
                                             text_cols='Sequence', label_cols='Promoter', bs=300)
-breakpoint()                                    
+
+
+def create_batch(ds, target):
+    """
+    @ comment: returns a list of batches with input and target values
+    """
+    ds = np.array([d[0].data for d in ds])
+    _data = np.array([(ds[i], tar) for i, tar in enumerate(target)])
+    for i in range(0, len(_data), BATCH_SIZE):
+        yield _data[i:i+BATCH_SIZE]
+
+
+train_data_batch = create_batch(data_clas.train_ds, train_df['Promoter'].tolist())
+validation_data_batch = create_batch(data_clas.valid_ds, valid_df['Promoter'].tolist())
+test_data_batch = create_batch(data_clas.test_ds, test_df['Promoter'].tolist())
+    
 
 learning_rate = tutils.CustomSchedule(D_MODEL)
 optimizer = tf.keras.optimizers.Adam(learning_rate,
@@ -102,7 +119,7 @@ for epoch in range(EPOCHS):
     train_accuracy.reset_states()
     
     # inp -> portuguese, tar -> english
-    for (batch, (inp, tar)) in enumerate(train_dataset):
+    for (batch, (inp, tar)) in enumerate(train_data_batch):
         train_step(inp, tar)
         
         if batch % 50 == 0:
