@@ -102,8 +102,7 @@ if ckpt_manager.latest_checkpoint:
 
 def train_step(inp, tar):
     with tf.GradientTape() as tape:
-        predictions, _ = transformer(inp, tar, 
-                                    True)
+        predictions, _ = transformer(inp, tar, True)
         loss = loss_function(tar, predictions)
 
     gradients = tape.gradient(loss, transformer.trainable_variables)    
