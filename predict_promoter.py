@@ -36,8 +36,6 @@ classification_df = pd.read_csv(path/'e_coli_promoters_dataset.csv')
 train_df = classification_df[classification_df.set == 'train'].sample(frac=1)
 valid_df = classification_df[classification_df.set == 'valid'].sample(frac=1)
 test_df = classification_df[classification_df.set == 'test'].sample(frac=1)
-
-
 # I will provisionally use fastai tokenizer and libraries, but the next part can be optimesed quite easily
 tok = tokutils.Tokenizer(tokutils.GenomicTokenizer, n_cpus=1, pre_rules=[], post_rules=[], special_cases=['xxpad'])
 data_clas = tokutils.GenomicTextClasDataBunch.from_df(path, train_df, valid_df, test_df=test_df, tokenizer=tok, 
@@ -83,7 +81,7 @@ train_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(
                                     name='train_accuracy')
 
 
-transformer = tutils.Transformer(NUM_LAYERS, 
+transformer = tutils.Encoder(NUM_LAYERS, 
                             D_MODEL, 
                             NUM_HEADS, DFF,
                             rate=DROPOUT_RATE)

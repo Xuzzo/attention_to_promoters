@@ -55,18 +55,37 @@ def _genomic_join_texts(texts:Collection[str], mark_fields:bool=False):
     return text_col.values
 
 
-def _get_genomic_processor(tokenizer:Tokenizer=None, vocab:Vocab=None, chunksize:int=10000, max_vocab:int=60000,
-                   min_freq:int=2, mark_fields:bool=False):
+def _get_genomic_processor(tokenizer: Tokenizer = None,
+                           vocab: Vocab = None,
+                           chunksize: int = 10000,
+                           max_vocab: int = 60000,
+                           min_freq: int = 2,
+                           mark_fields: bool = False):
     return [GenomicTokenizeProcessor(tokenizer=tokenizer, chunksize=chunksize, mark_fields=mark_fields),
             GenomicNumericalizeProcessor(vocab=vocab, max_vocab=max_vocab, min_freq=min_freq)]
 
 
 class GenomicTextClasDataBunch(TextClasDataBunch):
     @classmethod
-    def from_df(cls, path:PathOrStr, train_df:DataFrame, valid_df:DataFrame, test_df:Optional[DataFrame]=None,
-                tokenizer:Tokenizer=None, vocab:Vocab=None, classes:Collection[str]=None, text_cols:IntsOrStrs=1,
-                label_cols:IntsOrStrs=0, label_delim:str=None, chunksize:int=10000, max_vocab:int=60000,
-                min_freq:int=2, mark_fields:bool=False, pad_idx=0, pad_first=True, bs=64, **kwargs) -> DataBunch:
+    def from_df(cls,
+                path: PathOrStr,
+                train_df: DataFrame,
+                valid_df: DataFrame,
+                test_df: Optional[DataFrame] = None,
+                tokenizer: Tokenizer = None,
+                vocab: Vocab = None,
+                classes: Collection[str] = None,
+                text_cols: IntsOrStrs = 1,
+                label_cols: IntsOrStrs = 0,
+                label_delim: str = None,
+                chunksize: int = 10000,
+                max_vocab: int = 60000,
+                min_freq: int = 2,
+                mark_fields: bool = False,
+                pad_idx=0,
+                pad_first=True,
+                bs=64,
+                **kwargs) -> DataBunch:
         "Create a `TextDataBunch` from DataFrames. `kwargs` are passed to the dataloader creation."
         processor = _get_genomic_processor(tokenizer=tokenizer, vocab=vocab, chunksize=chunksize, max_vocab=max_vocab,
                                    min_freq=min_freq, mark_fields=mark_fields)
