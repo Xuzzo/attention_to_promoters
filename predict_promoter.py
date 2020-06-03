@@ -1,7 +1,6 @@
 import sys
 import os
 
-
 sys.path.insert(0, '/Users/mmfp/opt/anaconda3/lib/python3.7/site-packages/')
 sys.path.insert(0, '/usr/local/lib/python3.7/site-packages')
 cdir = os.path.abspath(__file__)
